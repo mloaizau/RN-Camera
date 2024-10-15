@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type {PropsWithChildren} from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -16,6 +16,8 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
+import { Camera } from 'react-native-vision-camera'
 
 import {
   Colors,
@@ -29,7 +31,7 @@ type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
+function Section({ children, title }: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -56,44 +58,57 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 }
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const { hasPermission, requestPermission } = useCameraPermission()
+  // Check permission status
+  if (!hasPermission) {
+    // Request permission if not granted
+    requestPermission()
+  }
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const device = useCameraDevice('back')
+  if (device == null) return <SafeAreaView></SafeAreaView>
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+    <Camera
+      style={StyleSheet.absoluteFill}
+      device={device}
+      isActive={true}
+    />
+  )
+
+
+  // return (
+  //   <SafeAreaView style={backgroundStyle}>
+  //     <StatusBar
+  //       barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+  //       backgroundColor={backgroundStyle.backgroundColor}
+  //     />
+  //     <ScrollView
+  //       contentInsetAdjustmentBehavior="automatic"
+  //       style={backgroundStyle}>
+  //       <Header />
+  //       <View
+  //         style={{
+  //           backgroundColor: isDarkMode ? Colors.black : Colors.white,
+  //         }}>
+  //         <Section title="Step One">
+  //           Edit <Text style={styles.highlight}>App.tsx</Text> to change this
+  //           screen and then come back to see your edits.
+  //         </Section>
+  //         <Section title="See Your Changes">
+  //           <ReloadInstructions />
+  //         </Section>
+  //         <Section title="Debug">
+  //           <DebugInstructions />
+  //         </Section>
+  //         <Section title="Learn More">
+  //           Read the docs to discover what to do next:
+  //         </Section>
+  //         <LearnMoreLinks />
+  //       </View>
+  //     </ScrollView>
+  //   </SafeAreaView>
+  // );
 }
 
 const styles = StyleSheet.create({
